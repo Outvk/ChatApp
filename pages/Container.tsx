@@ -60,6 +60,14 @@ export default function Container({ selectedUser, chatBackground }: {
   selectedUser: any;
   chatBackground: string;
 }) {
+  // Add default values for SSR
+  const safeSelectedUser = selectedUser || {
+    name: "Default User",
+    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
+    status: "Online",
+    isOnline: true,
+  }
+  const safeChatBackground = chatBackground || "default"
   const [userChats, setUserChats] = useState<{ [userId: string]: any[] }>({})
   const [currentUserId, setCurrentUserId] = useState<string>("")
   const [newMessage, setNewMessage] = useState("")
@@ -82,8 +90,8 @@ export default function Container({ selectedUser, chatBackground }: {
 
   // Initialize chat when selectedUser changes
   useEffect(() => {
-    if (selectedUser?.name) {
-      const userId = selectedUser.name
+    if (safeSelectedUser?.name) {
+      const userId = safeSelectedUser.name
       if (!userChats[userId]) {
         setUserChats(prev => ({
           ...prev,
@@ -92,7 +100,7 @@ export default function Container({ selectedUser, chatBackground }: {
       }
       setCurrentUserId(userId)
     }
-  }, [selectedUser?.name])
+  }, [safeSelectedUser?.name])
 
   // Auto-scroll to bottom when messages or typing changes
   useEffect(() => {
@@ -165,7 +173,7 @@ export default function Container({ selectedUser, chatBackground }: {
               messages: [
                 {
                   role: 'system',
-                  content: `You are ${selectedUser.name}, a friendly and helpful assistant. Respond naturally to the user's message. Keep responses conversational and appropriate length.`
+                  content: `You are ${safeSelectedUser.name}, a friendly and helpful assistant. Respond naturally to the user's message. Keep responses conversational and appropriate length.`
                 },
                 {
                   role: 'user',
@@ -188,8 +196,8 @@ export default function Container({ selectedUser, chatBackground }: {
 
           const botMessage = {
             id: (userChats[currentUserId]?.length || 0) + 2,
-            user: selectedUser.name,
-            avatar: selectedUser.avatar,
+            user: safeSelectedUser.name,
+            avatar: safeSelectedUser.avatar,
             message: data.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.",
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             isOwn: false,
@@ -211,8 +219,8 @@ export default function Container({ selectedUser, chatBackground }: {
           console.error('Error calling Mistral API:', error)
           const errorMessage = {
             id: (userChats[currentUserId]?.length || 0) + 2,
-            user: selectedUser.name,
-            avatar: selectedUser.avatar,
+            user: safeSelectedUser.name,
+            avatar: safeSelectedUser.avatar,
             message: "I'm having trouble connecting to Mistral AI. Please check your API key and try again.",
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             isOwn: false,
@@ -503,18 +511,18 @@ export default function Container({ selectedUser, chatBackground }: {
   }
 
   const getMessagesContainerStyle = () => {
-    console.log('getMessagesContainerStyle called with chatBackground:', chatBackground)
+    console.log('getMessagesContainerStyle called with chatBackground:', safeChatBackground)
 
     const baseStyle: React.CSSProperties = {
       minHeight: '100%'
     }
 
-    if (chatBackground === 'default') {
+    if (safeChatBackground === 'default') {
       return baseStyle
     }
 
-    if (chatBackground.startsWith('gradient')) {
-      const backgroundImage = getBackgroundImage(chatBackground)
+    if (safeChatBackground.startsWith('gradient')) {
+      const backgroundImage = getBackgroundImage(safeChatBackground)
       console.log('Applying gradient background:', backgroundImage)
       return {
         ...baseStyle,
@@ -526,8 +534,8 @@ export default function Container({ selectedUser, chatBackground }: {
       }
     }
 
-    if (chatBackground.startsWith('solid')) {
-      const backgroundColor = getBackgroundColor(chatBackground)
+    if (safeChatBackground.startsWith('solid')) {
+      const backgroundColor = getBackgroundColor(safeChatBackground)
       console.log('Applying solid background:', backgroundColor)
       return {
         ...baseStyle,
@@ -561,16 +569,16 @@ export default function Container({ selectedUser, chatBackground }: {
         <div className="flex items-center gap-3">
           <div className="relative">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
-              <AvatarFallback>{selectedUser.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
+              <AvatarImage src={safeSelectedUser.avatar} alt={safeSelectedUser.name} />
+              <AvatarFallback>{safeSelectedUser.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
             </Avatar>
-            {selectedUser.isOnline && (
+            {safeSelectedUser.isOnline && (
               <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-background"></div>
             )}
           </div>
           <div>
-            <h2 className="font-semibold text-foreground">{selectedUser.name}</h2>
-            <p className="text-sm text-muted-foreground">{selectedUser.status}</p>
+            <h2 className="font-semibold text-foreground">{safeSelectedUser.name}</h2>
+            <p className="text-sm text-muted-foreground">{safeSelectedUser.status}</p>
           </div>
         </div>
 
@@ -618,7 +626,7 @@ export default function Container({ selectedUser, chatBackground }: {
       <div className="relative h-96 sm:h-[500px] md:h-[600px] lg:h-[500px] overflow-hidden">
         <div
           className="p-4 h-full overflow-y-auto"
-          data-background={chatBackground}
+          data-background={safeChatBackground}
           style={getMessagesContainerStyle()}
         >
           {/* Welcome Header - shows only when no messages */}
@@ -629,7 +637,7 @@ export default function Container({ selectedUser, chatBackground }: {
                   <span className="text-2xl">💬</span>
                 </div>
                 <h2 className="text-xl font-semibold text-foreground mb-2">
-                  Start a conversation with {selectedUser.name}
+                  Start a conversation with {safeSelectedUser.name}
                 </h2>
                 <p className="text-muted-foreground">
                   Send a message to begin chatting. Your conversation will appear here.
@@ -737,7 +745,7 @@ export default function Container({ selectedUser, chatBackground }: {
                             height={20}
                             barCount={12}
                             className="w-full"
-                            audioData={msg.audioBlob}
+                           
                           />
                         </div>
                       ) : msg.isFile ? (
@@ -822,13 +830,13 @@ export default function Container({ selectedUser, chatBackground }: {
             {isTyping && (
               <div className="flex gap-3 justify-start animate-fadeIn">
                 <Avatar className="h-8 w-8 mt-1">
-                  <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
-                  <AvatarFallback className="text-xs">{selectedUser.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
+                  <AvatarImage src={safeSelectedUser.avatar} alt={safeSelectedUser.name} />
+                  <AvatarFallback className="text-xs">{safeSelectedUser.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
                 </Avatar>
 
                 <div className="flex flex-col gap-1 max-w-[70%] items-start">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-muted-foreground">{selectedUser.name}</span>
+                    <span className="text-sm font-medium text-muted-foreground">{safeSelectedUser.name}</span>
                     <span className="text-xs text-muted-foreground">typing...</span>
                   </div>
 
@@ -914,7 +922,7 @@ export default function Container({ selectedUser, chatBackground }: {
         isOpen={showCallModal}
         onClose={handleCloseCall}
         callType={callType}
-        selectedUser={selectedUser}
+        selectedUser={safeSelectedUser}
       />
     </div>
   )

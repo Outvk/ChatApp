@@ -13,6 +13,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [showChat, setShowChat] = useState(false)
+  const [showBottomBar, setShowBottomBar] = useState(false)
   const [selectedUser, setSelectedUser] = useState({
     name: "Alice Johnson",
     avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
@@ -23,6 +24,17 @@ export default function Home() {
 
   useEffect(() => {
     setIsLoaded(true)
+  }, [])
+
+  // Scroll effect for bottom bar
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      setShowBottomBar(scrollPosition > 100) // Show bottom bar after scrolling 100px
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const handleUserSelect = (user: any) => {
@@ -58,11 +70,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-700">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-60 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-60 w-80 h-80 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      
         <div className="absolute top-30 left-[480px] w-[480px] h-80 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-5 animate-blob animation-delay-4000"></div>
       </div>
 
@@ -73,8 +85,8 @@ export default function Home() {
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              ChatApp
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              AI Chatapp
             </span>
           </div>
           <div className="hidden md:flex items-center space-x-6">
@@ -87,7 +99,7 @@ export default function Home() {
             <ThemeToggle />
             <Button
               onClick={() => setShowChat(true)}
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              className="bg-gradient-to-r from-blue-900 to-purple-400 hover:from-gray-900 hover:to-purple-300 hover:text-white"
             >
               Start Chatting
             </Button>
@@ -205,11 +217,11 @@ export default function Home() {
 
         {/* CTA Section */}
         <section className="px-6 py-20 text-center">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-white">
-            <h2 className="text-4xl font-bold mb-6">
+          <div className="bg-gradient-to-r from-cyan-900 to-teal-700 rounded-3xl p-12 text-gray-900 dark:text-gray-100">
+            <h2 className="text-4xl font-bold mb-6 text-white">
               Ready to Experience the Future?
             </h2>
-            <p className="text-xl mb-8 opacity-90">
+            <p className="text-xl mb-8 opacity-90 text-gray-00">
               Join thousands of users already enjoying seamless communication
             </p>
             <Button
@@ -221,6 +233,43 @@ export default function Home() {
             </Button>
           </div>
         </section>
+             {/* Floating "Made By VK" Button */}
+             <div className="fixed right-285 bottom-1 transform -translate-y-1/2 z-50">
+          <Button
+            variant="outline"
+            size="lg"
+            className="bg-gray/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-white/70 dark:hover:bg-gray-800 hover:border-blue-900 dark:hover:border-blue-100 transition-all duration-300 shadow-lg hover:shadow-xl"
+          >
+            Made By VK
+          </Button>
+        </div>
+
+        {/* Bottom Blurred Navigation Bar */}
+        <div
+          className={`fixed bottom-0 left-0 right-0 z-40 transition-all duration-500 ${
+            showBottomBar
+              ? 'translate-y-0 opacity-100'
+              : 'translate-y-full opacity-0'
+          }`}
+        >
+          {/* Gradient mask overlay for smooth border effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-gray-900/20 pointer-events-none"></div>
+
+          <div className="relative bg-white/10 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg overflow-hidden">
+            {/* Animated border gradient */}
+        
+
+            <div className="flex items-center justify-center space-x-8 py-4 px-6 relative">
+              {/* Left fade mask */}
+              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white/30 to-transparent dark:from-gray-900/30 pointer-events-none"></div>
+
+              {/* Right fade mask */}
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/30 to-transparent dark:from-gray-900/30 pointer-events-none"></div>
+
+         
+            </div>
+          </div>
+        </div>
 
         {/* Footer */}
         <footer className="px-6 py-12 text-center text-gray-600 dark:text-gray-300">
