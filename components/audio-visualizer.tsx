@@ -6,6 +6,7 @@ interface AudioVisualizerProps {
   height?: number
   barCount?: number
   className?: string
+  audioData?: any;
 }
 
 export function AudioVisualizer({
